@@ -7,48 +7,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="src/output.css">
-  <title>SorsogoGO</title>
+  <title>More Details</title>
 </head>
-<body class="font-montserrat bg-lincoln-green">
+<body class="font-montserrat">
   
-  <main class="pt-10">
-    <header class="flex items-center justify-between px-4 mb-20 sm:px-10 md:px-20 lg:px-28 lg:mb-32">
-      <img class="w-16 mr-4 sm:w-20 md:w-24" src="img/logo.png" alt="Logo">
-      <h1 class="text-white font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl">Sorsogo<span class="text-golden-yellow">GO</span></h1>
-      <div></div>
-    </header>
+  <main class="flex flex-col items-center">
 
-    <section class="px-4 sm:px-10 md:px-20 lg:px-28 mb-12">
-      <h1 class="text-white font-bold text-4xl sm:5xl md:text-6xl mb-4">
-        Find the <span class="text-golden-yellow">Perfect Store</span> Near You
-      </h1>
-      <p class="text-white font-semibold sm:text-lg mb-20">
-        Explore local stores in your area, from flower shops to groceries, and get directions instantly with Google Maps.
-      </p>
+    <h1 id="shop-name" class="bg-lincoln-green w-full text-white text-4xl text-center py-10 font-bold mb-4">Mai Cafe</h1>
 
-      <div class="flex flex-col justify-center items-center gap-2">
-        <select name="" id="category" class="block w-64 py-2 px-3 font-semibold sm:font-bold border border-golden-yellow bg-golden-yellow text-dark-green rounded-md shadow-sm focus:outline-none cursor-pointer">
-            <option class="bg-white" value="">Choose Category</option>
-            <option class="bg-white" value="botique">Botique</option>
-            <option class="bg-white" value="cafe">Cafe</option>
-            <option class="bg-white" value="electronics">Electronics</option>
-            <option class="bg-white" value="flowershop">Flowershop</option>
-            <option class="bg-white" value="restaurant">Restaurant</option>
-            <option class="bg-white" value="shoppingmall">Shopping Mall</option>
-        </select>
+    <div id="imageContainer" class="flex flex-wrap gap-2 justify-center items-center">
+      <!-- Images will be dynamically inserted here -->
+    </div>
+
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden">
+      <div class="relative">
+        <img id="modalImage" class="max-w-full max-h-screen rounded-lg cursor-grab">
+        <button id="closeModal" class="absolute top-2 right-2 text-white bg-red-500 hover:bg-red-600 rounded-full w-8 h-8 flex items-center justify-center">
+          &times;
+        </button>
       </div>
-    </section>
+    </div>
 
-    <section class="bg-white px-10 py-10">
-      <h1 class="text-center font-bold text-3xl text-dark-green mb-10">Available Shops</h1>
-    
-      <div id="shop-list" class="flex justify-center flex-wrap gap-10">
-      </div>
+    <a id="map-link" href="" target="_blank" class="w-40 text-center text-dark-green bg-golden-yellow py-2 px-3 font-bold rounded-md mt-4 mb-4 hover:bg-[#FFA500] hover:text-white">GO</a>
 
-      <div id="photos">
-      </div>
-
-    </section>
   </main>
 
   <footer class="bg-dark-green text-white py-4">
@@ -57,7 +38,7 @@
     </div>
   </footer>
 
-
+  <!-- Modal -->
 
   <script>
     const shops = [
@@ -227,50 +208,135 @@
     },
   ]
 
+    const imageContainer = document.getElementById('imageContainer');
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const closeModal = document.getElementById('closeModal');
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = parseInt(urlParams.get("id"), 10);
 
-  function renderedShops(filteredShops) {
-    const shopList = document.getElementById('shop-list');
-    shopList.innerHTML = ''; // Clear the existing stores
+    // Find the shop by id
+    const shop = shops.find((shop) => shop.id === id);
 
-    if (filteredShops.length === 0) {
-      shopList.innerHTML = '<p class="text-lg text-gray-600">No stores found.</p>';
-      return;
+    // Display shop details
+    if (shop) {
+      document.getElementById('shop-name').textContent = shop.name;
+      document.getElementById('map-link').href = shop.mapLink;
+
+      // Display images
+      shop.images.forEach(imageSrc => {
+        const imgElement = document.createElement('img');
+        imgElement.src = imageSrc;
+        imgElement.alt = `${shop.name} Image`;
+        imgElement.className = "w-full min-h-[490px] lg:max-h-[490px] lg:min-w-96 object-cover sm:w-2/3 md:w-2/5 lg:w-3/12 rounded-lg shadow-sm shadow-gray-400 hover:shadow-lg transition-shadow duration-300 cursor-pointer";
+
+        imgElement.addEventListener('click', () => {
+          modalImage.src = imageSrc;
+          scale = 1;
+          translateX = 0;
+          translateY = 0;
+          updateTransform();
+          imageModal.classList.remove('hidden');
+        });
+
+        imageContainer.appendChild(imgElement);
+      });
+    } else {
+      document.body.innerHTML = `<h1>Shop not found</h1>`;
     }
+    
 
-    filteredShops.forEach((shop) => {
-      const shopDiv = document.createElement('div');
-      shopDiv.className = 'w-80 flex flex-col px-2 py-4 items-center justify-center border border-light-gray rounded-xl shadow-lg shadow-gray-700';
-      
-      shopDiv.innerHTML = `
-        <h1 class="text-lg font-bold text-center text-dark-green h-16 flex items-center mb-2">${shop.name}</h1>
-      <img class="w-80 h-60 object-cover" src="${shop.thumbnail}" alt="thumbnail">
-      <div class="flex justify-between items-center w-full mt-2">
-        <a href="moredetails.html?id=${shop.id}" class="text-white bg-lincoln-green py-2 px-3 font-bold rounded-md hover:bg-dark-green">More details</a>
-        <a href="${shop.mapLink}" target="_blank" class="text-dark-green bg-golden-yellow py-2 px-3 font-bold rounded-md hover:bg-[#FFA500] hover:text-white">GO</a>
-      </div>
-      `;
-      shopList.appendChild(shopDiv);
+    let scale = 1;
+    const ZOOM_STEP = 0.1;
+    const MAX_SCALE = 3;
+    const MIN_SCALE = 1;
+
+    let isDragging = false;
+    let startX, startY;
+    let translateX = 0, translateY = 0;
+
+    // shops.forEach(shop => {
+    //   shop.images.forEach(imageSrc => {
+    //     const imgElement = document.createElement('img');
+    //     imgElement.src = imageSrc;
+    //     imgElement.alt = `${shop.name} Image`;
+    //     imgElement.className = "w-full min-h-[490px] lg:max-h-[490px] object-cover sm:w-2/3 md:w-2/5 lg:w-3/12 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 cursor-pointer";
+
+    //     imgElement.addEventListener('click', () => {
+    //       modalImage.src = imageSrc;
+    //       scale = 1;
+    //       translateX = 0;
+    //       translateY = 0;
+    //       updateTransform();
+    //       imageModal.classList.remove('hidden');
+    //     });
+
+    //     imageContainer.appendChild(imgElement);
+    //   });
+    // });
+
+    closeModal.addEventListener('click', () => {
+      imageModal.classList.add('hidden');
     });
-  }
 
-  renderedShops(shops);
+    imageModal.addEventListener('click', (e) => {
+      if (e.target === imageModal) {
+        imageModal.classList.add('hidden');
+      }
+    });
 
-  document.getElementById('category').addEventListener('change', () => {
-  const selectedCategory = document.getElementById('category').value;
+    modalImage.addEventListener('wheel', (event) => {
+      event.preventDefault();
 
-  // Filter stores based on the selected category
-  const filteredShops = selectedCategory
-    ? shops.filter((shop) => shop.category === selectedCategory)
-    : shops;
+      const rect = modalImage.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
 
-    console.log(filteredShops)
+      const offsetX = (mouseX - rect.width / 2) / scale;
+      const offsetY = (mouseY - rect.height / 2) / scale;
 
-  // Render the filtered stores
-  renderedShops(filteredShops);
-});
+      if (event.deltaY < 0) {
+        if (scale < MAX_SCALE) {
+          scale += ZOOM_STEP;
+          translateX -= offsetX * ZOOM_STEP;
+          translateY -= offsetY * ZOOM_STEP;
+        }
+      } else {
+        if (scale > MIN_SCALE) {
+          scale -= ZOOM_STEP;
+          translateX += offsetX * ZOOM_STEP;
+          translateY += offsetY * ZOOM_STEP;
+        }
+      }
 
+      updateTransform();
+    });
+
+    modalImage.addEventListener('mousedown', (event) => {
+      isDragging = true;
+      startX = event.clientX - translateX;
+      startY = event.clientY - translateY;
+      modalImage.style.cursor = 'grabbing';
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      modalImage.style.cursor = 'grab';
+    });
+
+    document.addEventListener('mousemove', (event) => {
+      if (isDragging) {
+        translateX = event.clientX - startX;
+        translateY = event.clientY - startY;
+        updateTransform();
+      }
+    });
+
+    function updateTransform() {
+      modalImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+    }
   </script>
-
 </body>
+
 </html>
